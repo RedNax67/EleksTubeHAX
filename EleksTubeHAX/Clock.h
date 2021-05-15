@@ -18,12 +18,13 @@ public:
   Clock() : loop_time(0), local_time(0), time_valid(false), config(NULL) {}
   
   // The global WiFi from WiFi.h must already be .begin()'d before calling Clock::begin()
-  void begin(StoredConfig::Config::Clock *config_); 
+  void begin(StoredConfig::Config::Clock *config_, const char*); 
   void loop();
 
   // Calls NTPClient::getEpochTime() or RTC::get() as appropriate
   // This has to be static to pass to TimeLib::setSyncProvider.
   static time_t syncProvider();
+  String getLocalTime(String);
 
   // Set preferred hour format. true = 12hr, false = 24hr
   void setTwelveHour(bool twelve_hour_) { config->twelve_hour = twelve_hour_; }

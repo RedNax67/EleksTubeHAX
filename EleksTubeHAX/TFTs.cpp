@@ -21,7 +21,7 @@ void TFTs::begin() {
 void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
   uint8_t old_value = digits[digit];
   digits[digit] = value;
-  
+    //Serial.println(value);
   if (show != no && (old_value != value || show == force)) {
     showDigit(digit);
   }
@@ -36,6 +36,7 @@ void TFTs::showDigit(uint8_t digit) {
   // Filenames are no bigger than "255.bmp\0"
   char file_name[10];
   sprintf(file_name, "/%d.bmp", digits[digit]);
+  //Serial.print(file_name);
   drawBmp(file_name, 0, 0);
 }
 

@@ -9,6 +9,8 @@
 // put two lines in here defining `const char *ssid` and `const char *password`.
 // The file wifi_creds.h is in .gitignore so we don't risk accidentally sharing our creds with the world.
 #include "wifi_creds.h"
+#include "timezone_set.h"
+
 
 Backlights backlights;
 Buttons buttons;
@@ -57,7 +59,7 @@ void setup() {
   tfts.println("\nDone.");
 
   // Setup the clock.  It needs WiFi to be established already.
-  uclock.begin(&stored_config.config.uclock);
+  uclock.begin(&stored_config.config.uclock, Timezone);
   
   // Leave boot up messages on screen for a few seconds.
   for (uint8_t ndx=0; ndx < 2; ndx++) {
@@ -206,11 +208,15 @@ void setupMenu() {
   tfts.setCursor(0, 124, 4);
 }
 
+
 void updateClockDisplay(TFTs::show_t show) {
-  tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), show);
-  tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), show);
-  tfts.setDigit(MINUTES_TENS, uclock.getMinutesTens(), show);
-  tfts.setDigit(MINUTES_ONES, uclock.getMinutesOnes(), show);
-  tfts.setDigit(SECONDS_TENS, uclock.getSecondsTens(), show);
-  tfts.setDigit(SECONDS_ONES, uclock.getSecondsOnes(), show);
+
+  String timeStringBuff = uclock.getLocalTime(TZ_Format);
+  
+  tfts.setDigit(HOURS_TENS, uint8_t(timeStringBuff[0])-48, show);
+  tfts.setDigit(HOURS_ONES, uint8_t(timeStringBuff[1])-48, show);
+  tfts.setDigit(MINUTES_TENS, uint8_t(timeStringBuff[2])-48, show);
+  tfts.setDigit(MINUTES_ONES, uint8_t(timeStringBuff[3])-48, show);
+  tfts.setDigit(SECONDS_TENS, uint8_t(timeStringBuff[4])-48, show);
+  tfts.setDigit(SECONDS_ONES, uint8_t(timeStringBuff[5])-48, show);
 }
