@@ -51,6 +51,7 @@ void setup() {
   // TODO Once we've added a way to SET the SSID and Password from the menu, use
   // stored_config.config.wifi to store and recall them.
   // For now, we're still pulling them from wifi_creds.h
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -212,7 +213,7 @@ void setupMenu() {
 void updateClockDisplay(TFTs::show_t show) {
 
   String timeStringBuff = uclock.getLocalTime(TZ_Format);
-  
+  // Ugly, but it works
   tfts.setDigit(HOURS_TENS, uint8_t(timeStringBuff[0])-48, show);
   tfts.setDigit(HOURS_ONES, uint8_t(timeStringBuff[1])-48, show);
   tfts.setDigit(MINUTES_TENS, uint8_t(timeStringBuff[2])-48, show);
