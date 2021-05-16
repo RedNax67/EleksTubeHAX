@@ -16,6 +16,9 @@ In the source code directory (where ever you just installed it), copy `wifi_cred
 
 Note that `wifi_creds.h` is in `.gitignore`, so you can safely put credentials in that file and still submit pull requests, push code, whatever.  git will never store your credentials in a repository.
 
+### Configure your timezone
+In the source code directory (where ever you just installed it), find timezone_set.h and edit it for your timezone.
+
 ## Setup Arduino IDE
 Development was done on Arduino 1.8.13.  It might work on earlier or later versions, I don't know.
 
@@ -190,4 +193,4 @@ The DS3231 ([datasheet](https://datasheets.maximintegrated.com/en/ds/DS3231.pdf)
 Mark Smith, aka Smitty
 @SmittyHalibut on GitHub, Twitter, and YouTube.
 
-
+@Rednax67

@@ -1,5 +1,7 @@
+//Find your string here https://remotemonitoringsystems.ca/time-zone-abbreviations.php
+
 const char* Timezone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";       // NL
-const char* TZ_Format = "M"; //24H  Use "I" for emperial (am/pm)
+const char* TZ_Format = "M"; //24H  Use "I" for imperial (am/pm)
 
 //Example time zones
 //const char* Timezone = "GMT0BST,M3.5.0/01,M10.5.0/02";     // UK

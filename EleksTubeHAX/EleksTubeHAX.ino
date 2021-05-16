@@ -9,6 +9,9 @@
 // put two lines in here defining `const char *ssid` and `const char *password`.
 // The file wifi_creds.h is in .gitignore so we don't risk accidentally sharing our creds with the world.
 #include "wifi_creds.h"
+
+//Set your timezone in this file
+//Find your string here https://remotemonitoringsystems.ca/time-zone-abbreviations.php
 #include "timezone_set.h"
 
 
