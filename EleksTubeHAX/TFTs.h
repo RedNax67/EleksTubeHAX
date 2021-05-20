@@ -17,6 +17,8 @@ public:
 
   // no == Do not send to TFT. yes == Send to TFT if changed. force == Send to TFT.
   enum show_t { no, yes, force };
+  // A digit of 0xFF means blank the screen.
+  const static uint8_t blanked = 255;
   void begin();
   void showAllDigits()  { for (uint8_t digit=0; digit < NUM_DIGITS; digit++) showDigit(digit); }
   void showDigit(uint8_t digit);
@@ -28,6 +30,7 @@ public:
   bool isEnabled()            { return enabled; }
 
   void setDigit(uint8_t digit, uint8_t value, show_t show=yes);
+  void printString(char *tftString, show_t show);
   uint8_t getDigit(uint8_t digit)                             { return digits[digit]; }
 
   // Making chip_select public so we don't have to proxy all methods, and the caller can just use it directly.
@@ -43,6 +46,7 @@ private:
   uint16_t read16(fs::File &f);
   uint32_t read32(fs::File &f);
 
+  static uint16_t output_buffer[TFT_HEIGHT][TFT_WIDTH];
 };
 
 #endif // TFTS_H

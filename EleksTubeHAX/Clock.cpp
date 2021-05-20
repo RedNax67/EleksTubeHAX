@@ -4,6 +4,9 @@
 String Date_str, Time_str, Time_format;
 //const char* Timezone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";       // NL
 
+struct timeval prev_sync;
+char hour_output[7], day_output[7];
+
 
 void Clock::begin(StoredConfig::Config::Clock *config_, const char* Timezone) {
   config = config_;
@@ -12,14 +15,22 @@ void Clock::begin(StoredConfig::Config::Clock *config_, const char* Timezone) {
     // Config is invalid, probably a new device never had its config written.
     // Load some reasonable defaults.
     Serial.println("Loaded Clock config is invalid, using default.  This is normal on first boot.");
-    setTwelveHour(true);
-    setTimeZoneOffset(0);
+    setTwelveHour(false);
+    //setTimeZoneOffset(0);
     config->is_valid = StoredConfig::valid;
   }
+  
+  //configTzTime(Timezone, "pool.ntp.org", "time.nist.gov");
 
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   setenv("TZ", Timezone, 1);
+  tzset();
   Time_format = "M"; // or StartTime("I"); for Imperial 12:00 PM format and Date format MM-DD-CCYY e.g. 12:30PM 31-Mar-2019
+  sntp_set_time_sync_notification_cb(time_sync_notification_cb);
+  //sntp_set_sync_interval(15000);
+
+  prev_sync.tv_sec=0;
+  
 
   //ntpTimeClient.begin();
   //ntpTimeClient.update();
@@ -37,26 +48,30 @@ void Clock::loop() {
   }
 }
 
-
-String Clock::getLocalTime(String Format) {
+char* Clock::getLocalTime(String Format) {
   time_t now;
   time(&now);
   //See http://www.cplusplus.com/reference/ctime/strftime/
-  char hour_output[30], day_output[30];
   if (Format == "M") {
-    strftime(day_output, 30, "%a  %d-%m-%y", localtime(&now)); // Formats date as: Sat 24-Jun-17
-    strftime(hour_output, 30, "%H%M%S", localtime(&now));    // Formats time as: 14:05:49
+    //strftime(day_output, 7, "%d%m%y", localtime(&now));  // Formats date as: 240617
+    strftime(hour_output, 7, "%H%M%S",localtime(&now)); // Formats time as: 140549
+  } else {
+    strftime(day_output, 6, "%m%d%y",  localtime(&now));  // Formats date as: 062417
+    strftime(hour_output, 6, "%I%M%S",  localtime(&now)); // Formats time as: 020549 maybe use backled to indicate am/pm? Should be obvous though
   }
-  else {
-    strftime(day_output, 30, "%a  %m-%d-%y", localtime(&now)); // Formats date as: Sat Jun-24-17
-    strftime(hour_output, 30, "%I%M%S", localtime(&now));          // Formats time as: 2:05:49pm
-  }
-  Date_str = day_output;
-  Time_str = hour_output;
-  return Time_str;
+  return hour_output;
 }
 
 
+
+void Clock::time_sync_notification_cb(struct timeval *tv)
+{
+    Serial.println("Notification of a time synchronization event");
+    Serial.println(sntp_get_sync_status());
+    Serial.print("Seconds since last sync = ");
+    Serial.println(tv->tv_sec - prev_sync.tv_sec);
+    prev_sync.tv_sec=tv->tv_sec;
+}
 
 // Static methods used for sync provider to TimeLib library.
 time_t Clock::syncProvider() {
@@ -86,6 +101,8 @@ time_t Clock::syncProvider() {
   Serial.println("Using RTC time.");
   return rtc_now;
 }
+
+
 
 uint32_t Clock::millis_last_ntp = 0;
 WiFiUDP Clock::ntpUDP;

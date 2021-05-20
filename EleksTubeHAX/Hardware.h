@@ -41,6 +41,16 @@
 #define CSSR_CLOCK_PIN (16)
 #define CSSR_LATCH_PIN (17)
 
+// Chip Select shift register
+const uint8_t latchPin = 17;
+const uint8_t clockPin = 16;
+const uint8_t dataPin = 14;
+
+// TFT not handled by TFT_eSPI
+const uint8_t tftGndEnable = 27;
+
+
+
 // SPI to displays
 // DEFINED IN User_Setup.h
 // Look for: TFT_MOSI, TFT_SCLK, TFT_CS, TFT_DC, and TFT_RST

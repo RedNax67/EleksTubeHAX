@@ -14,7 +14,6 @@
 //Find your string here https://remotemonitoringsystems.ca/time-zone-abbreviations.php
 #include "timezone_set.h"
 
-
 Backlights backlights;
 Buttons buttons;
 TFTs tfts;
@@ -74,7 +73,7 @@ void setup() {
 
   // Start up the clock displays.
   tfts.fillScreen(TFT_BLACK);
-  uclock.loop();
+  //uclock.loop();
   updateClockDisplay(TFTs::force);
 }
 
@@ -84,7 +83,7 @@ void loop() {
   buttons.loop();
   menu.loop(buttons);  // Must be called after buttons.loop()
   backlights.loop();
-  uclock.loop();
+  //uclock.loop();
 
   // Power button
   if (buttons.power.isDownEdge()) {
@@ -96,7 +95,7 @@ void loop() {
 
 
   // Menu
-  if (menu.stateChanged()) {
+  if (menu.stateChanged() && tfts.isEnabled()) {
     Menu::states menu_state = menu.getState();
     int8_t menu_change = menu.getChange();
 
@@ -148,7 +147,8 @@ void loop() {
         tfts.println("12 Hour?");
         tfts.println(uclock.getTwelveHour() ? "12 hour" : "24 hour"); 
       }
-      // UTC Offset, hours
+         
+       // UTC Offset, hours
       else if (menu_state == Menu::utc_offset_hour) {
         if (menu_change != 0) {
           uclock.adjustTimeZoneOffset(menu_change * 3600);
@@ -215,12 +215,6 @@ void setupMenu() {
 
 void updateClockDisplay(TFTs::show_t show) {
 
-  String timeStringBuff = uclock.getLocalTime(TZ_Format);
-  // Ugly, but it works
-  tfts.setDigit(HOURS_TENS, uint8_t(timeStringBuff[0])-48, show);
-  tfts.setDigit(HOURS_ONES, uint8_t(timeStringBuff[1])-48, show);
-  tfts.setDigit(MINUTES_TENS, uint8_t(timeStringBuff[2])-48, show);
-  tfts.setDigit(MINUTES_ONES, uint8_t(timeStringBuff[3])-48, show);
-  tfts.setDigit(SECONDS_TENS, uint8_t(timeStringBuff[4])-48, show);
-  tfts.setDigit(SECONDS_ONES, uint8_t(timeStringBuff[5])-48, show);
+    tfts.printString(uclock.getLocalTime("M"), show );
+
 }
