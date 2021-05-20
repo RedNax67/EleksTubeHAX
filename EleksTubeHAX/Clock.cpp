@@ -64,10 +64,19 @@ char* Clock::getLocalTime(String Format) {
 
 
 
+String Clock::getLastNTPSync()
+{
+    char tmbuf[64], buf[64];
+    time_t nowtime;
+    struct tm *nowtm;
+    nowtime = prev_sync.tv_sec;
+    nowtm = localtime(&nowtime);
+    strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
+    return tmbuf;
+}
+
 void Clock::time_sync_notification_cb(struct timeval *tv)
 {
-    Serial.println("Notification of a time synchronization event");
-    Serial.println(sntp_get_sync_status());
     Serial.print("Seconds since last sync = ");
     Serial.println(tv->tv_sec - prev_sync.tv_sec);
     prev_sync.tv_sec=tv->tv_sec;

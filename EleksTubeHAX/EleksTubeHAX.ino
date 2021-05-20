@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
 #include "Buttons.h"
 #include "Backlights.h"
 #include "TFTs.h"
@@ -20,10 +22,58 @@ TFTs tfts;
 Clock uclock;
 Menu menu;
 StoredConfig stored_config;
+WebServer server(80);
 
 // Helper function, defined below.
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
 void setupMenu();
+
+void handleRoot() {
+  char temp[600];
+  int sec = millis() / 1000;
+  int min = sec / 60;
+  int hr = min / 60;
+  String lastNTP;
+  lastNTP=uclock.getLastNTPSync();
+  
+
+  snprintf(temp, sizeof(temp),"<html>\
+  <head>\
+    <meta http-equiv='refresh' content='5'/>\
+    <title>ElekstubeIPS Demo</title>\
+    <style>\
+      body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+    </style>\
+  </head>\
+  <body>\
+    <h1>Hello from ElekstubeIPS!</h1>\
+    <p>Uptime: %02d:%02d:%02d</p>\
+    <p>Last NTP update: %s</p>\
+  </body>\
+</html>", hr, min % 60, sec % 60, lastNTP.c_str()
+          );
+  server.send(200, "text/html", temp);
+}
+
+void handleNotFound() {
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+
+  for (uint8_t i = 0; i < server.args(); i++) {
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+
+  server.send(404, "text/plain", message);
+}
+
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -61,6 +111,20 @@ void setup() {
   }
   tfts.println("\nDone.");
 
+    if (MDNS.begin("elekstubeips")) {
+    Serial.println("MDNS responder started");
+  }
+
+  server.on("/", handleRoot);
+  server.on("/inline", []() {
+    server.send(200, "text/plain", "this works as well");
+  });
+  server.onNotFound(handleNotFound);
+  server.begin();
+  Serial.println("HTTP server started");
+
+
+
   // Setup the clock.  It needs WiFi to be established already.
   uclock.begin(&stored_config.config.uclock, Timezone);
   
@@ -83,6 +147,7 @@ void loop() {
   buttons.loop();
   menu.loop(buttons);  // Must be called after buttons.loop()
   backlights.loop();
+  server.handleClient();
   //uclock.loop();
 
   // Power button
@@ -217,4 +282,22 @@ void updateClockDisplay(TFTs::show_t show) {
 
     tfts.printString(uclock.getLocalTime("M"), show );
 
+}
+
+void drawGraph() {
+  String out = "";
+  char temp[100];
+  out += "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"400\" height=\"150\">\n";
+  out += "<rect width=\"400\" height=\"150\" fill=\"rgb(250, 230, 210)\" stroke-width=\"1\" stroke=\"rgb(0, 0, 0)\" />\n";
+  out += "<g stroke=\"black\">\n";
+  int y = rand() % 130;
+  for (int x = 10; x < 390; x += 10) {
+    int y2 = rand() % 130;
+    sprintf(temp, "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke-width=\"1\" />\n", x, 140 - y, x + 10, 140 - y2);
+    out += temp;
+    y = y2;
+  }
+  out += "</g>\n</svg>\n";
+
+  server.send(200, "image/svg+xml", out);
 }

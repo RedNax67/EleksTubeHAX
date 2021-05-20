@@ -32,6 +32,7 @@ class Clock {
     // This has to be static to pass to TimeLib::setSyncProvider.
     static time_t syncProvider();
     char* getLocalTime(String);
+    String getLastNTPSync();
 
     // Set preferred hour format. true = 12hr, false = 24hr
     void setTwelveHour(bool twelve_hour_) {
